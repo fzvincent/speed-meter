@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Primary Meta Tags -->
+    <title>Mobile Speed Meter - Professional GPS Speed Tracking</title>
+    <meta name="title" content="Mobile Speed Meter - Professional GPS Speed Tracking">
+    <meta name="description" content="Professional GPS-powered speed tracking application with real-time speed monitoring, multiple unit support including nautical knots, and location context awareness.">
+    <meta name="keywords" content="speed meter, GPS tracking, nautical speed, knots, mobile speedometer, marine navigation">
+    <meta name="author" content="Vincent">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://fzvincent.github.io/speed-meter/app.html">
+    <meta property="og:title" content="Mobile Speed Meter - Professional GPS Speed Tracking">
+    <meta property="og:description" content="Professional GPS-powered speed tracking with nautical support and multiple unit options.">
+    <meta property="og:image" content="https://fzvincent.github.io/speed-meter/app-preview.png">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://fzvincent.github.io/speed-meter/app.html">
+    <meta property="twitter:title" content="Mobile Speed Meter - GPS Speed Tracking">
+    <meta property="twitter:description" content="Professional GPS-powered speed tracking with nautical support.">
+    <meta property="twitter:image" content="https://fzvincent.github.io/speed-meter/app-preview.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3242615394147264"
+         crossorigin="anonymous"></script>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <link rel="stylesheet" href="styles.css">
+    
+    <style>
+        /* Additional styles for enhanced features */
+        .unit-selector {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .unit-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .unit-btn {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            color: #495057;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .unit-btn:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+        
+        .unit-btn.active {
+            background: #007bff;
+            border-color: #007bff;
+            color: white;
+        }
+        
+        .unit-btn.nautical {
+            background: #17a2b8;
+            border-color: #17a2b8;
+            color: white;
+        }
+        
+        .nautical-suggestion {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            color: #0c5460;
+            display: none;
+        }
+        
+        .nautical-suggestion.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .nautical-suggestion button {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-weight: 500;
+        }
+        
+        .nautical-suggestion button:hover {
+            background: #138496;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .location-context {
+            background: rgba(255,255,255,0.9);
+            border-radius: 10px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: #495057;
+            display: none;
+        }
+        
+        .location-context.show {
+            display: block;
+        }
+        
+        .location-context.sea {
+            background: rgba(23, 162, 184, 0.1);
+            border: 1px solid rgba(23, 162, 184, 0.3);
+            color: #0c5460;
+        }
+        
+        .footer-clean {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 20px;
+            text-align: center;
+            margin-top: auto;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .footer-clean .app-info {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        
+        .footer-clean .copyright {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📱 Speed Meter</h1>
+            <p class="subtitle">Professional GPS Speed Tracking</p>
+        </header>
+
+        <div class="location-context" id="locationContext">
+            <span id="locationText">📍 Detecting location...</span>
+        </div>
+
+        <div class="nautical-suggestion" id="nauticalSuggestion">
+            🌊 You appear to be near water. Would you like to switch to nautical knots for marine navigation?
+            <button onclick="switchToKnots()">Use Knots</button>
+            <button onclick="dismissNauticalSuggestion()">Dismiss</button>
+        </div>
+
+        <main>
+            <div class="speed-display">
+                <div class="current-speed">
+                    <span class="speed-value" id="currentSpeed">0</span>
+                    <span class="speed-unit" id="speedUnit">km/h</span>
+                </div>
+                <div class="speed-label">Current Speed</div>
+            </div>
+
+            <div class="unit-selector">
+                <h3>📏 Speed Units</h3>
+                <div class="unit-options">
+                    <button class="unit-btn active" data-unit="kmh" onclick="selectUnit('kmh')">
+                        km/h<br><small>Kilometers per hour</small>
+                    </button>
+                    <button class="unit-btn" data-unit="mph" onclick="selectUnit('mph')">
+                        mph<br><small>Miles per hour</small>
+                    </button>
+                    <button class="unit-btn" data-unit="ms" onclick="selectUnit('ms')">
+                        m/s<br><small>Meters per second</small>
+                    </button>
+                    <button class="unit-btn" data-unit="knots" onclick="selectUnit('knots')">
+                        knots<br><small>Nautical miles per hour</small>
+                    </button>
+                    <button class="unit-btn" data-unit="fps" onclick="selectUnit('fps')">
+                        ft/s<br><small>Feet per second</small>
+                    </button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="maxSpeed">0</div>
+                    <div class="stat-label">Max Speed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avgSpeed">0</div>
+                    <div class="stat-label">Avg Speed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="distance">0.00</div>
+                    <div class="stat-label" id="distanceLabel">Distance (km)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="duration">00:00</div>
+                    <div class="stat-label">Duration</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="startBtn" class="btn btn-start">Start Tracking</button>
+                <button id="stopBtn" class="btn btn-stop" disabled>Stop Tracking</button>
+                <button id="resetBtn" class="btn btn-reset">Reset</button>
+            </div>
+
+            <div class="location-info">
+                <div class="info-item">
+                    <strong>Accuracy:</strong> <span id="accuracy">-</span>
+                </div>
+                <div class="info-item">
+                    <strong>Altitude:</strong> <span id="altitude">-</span>
+                </div>
+                <div class="info-item">
+                    <strong>Coordinates:</strong> <span id="coordinates">-</span>
+                </div>
+            </div>
+
+            <div class="status" id="status">
+                <div class="status-icon">✅</div>
+                <div class="status-text">Ready to start tracking</div>
+            </div>
+        </main>
+
+        <!-- Google AdSense Ad Unit -->
+        <div style="margin: 20px 0; padding: 15px; min-height: 90px; background: rgba(255,255,255,0.05); border-radius: 10px; border: 1px dashed rgba(255,255,255,0.3);">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-3242615394147264"
+                 data-ad-slot="AUTO"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+
+        <footer class="footer-clean">
+            <div class="app-info">
+                📱 Mobile Speed Meter - Professional GPS Tracking
+            </div>
+            <div class="copyright">
+                © 2024 Vincent | GPS Speed Tracking Application
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        class EnhancedSpeedMeter {
+            constructor() {
+                this.isTracking = false;
+                this.watchId = null;
+                this.lastPosition = null;
+                this.lastTime = null;
+                this.speeds = [];
+                this.totalDistance = 0;
+                this.startTime = null;
+                this.currentUnit = 'kmh'; // kmh, mph, ms, knots, fps
+                this.nauticalSuggestionShown = false;
+                
+                this.unitConfigs = {
+                    kmh: { name: 'km/h', factor: 1, distanceUnit: 'km', distanceFactor: 0.001 },
+                    mph: { name: 'mph', factor: 0.621371, distanceUnit: 'mi', distanceFactor: 0.000621371 },
+                    ms: { name: 'm/s', factor: 0.277778, distanceUnit: 'm', distanceFactor: 1 },
+                    knots: { name: 'knots', factor: 0.539957, distanceUnit: 'nm', distanceFactor: 0.000539957 },
+                    fps: { name: 'ft/s', factor: 0.911344, distanceUnit: 'ft', distanceFactor: 3.28084 }
+                };
+                
+                this.initializeElements();
+                this.attachEventListeners();
+                this.checkGeolocationSupport();
+            }
+
+            initializeElements() {
+                this.elements = {
+                    currentSpeed: document.getElementById('currentSpeed'),
+                    speedUnit: document.getElementById('speedUnit'),
+                    maxSpeed: document.getElementById('maxSpeed'),
+                    avgSpeed: document.getElementById('avgSpeed'),
+                    distance: document.getElementById('distance'),
+                    distanceLabel: document.getElementById('distanceLabel'),
+                    duration: document.getElementById('duration'),
+                    accuracy: document.getElementById('accuracy'),
+                    altitude: document.getElementById('altitude'),
+                    coordinates: document.getElementById('coordinates'),
+                    status: document.getElementById('status'),
+                    startBtn: document.getElementById('startBtn'),
+                    stopBtn: document.getElementById('stopBtn'),
+                    resetBtn: document.getElementById('resetBtn'),
+                    locationContext: document.getElementById('locationContext'),
+                    locationText: document.getElementById('locationText'),
+                    nauticalSuggestion: document.getElementById('nauticalSuggestion')
+                };
+            }
+
+            attachEventListeners() {
+                this.elements.startBtn.addEventListener('click', () => this.startTracking());
+                this.elements.stopBtn.addEventListener('click', () => this.stopTracking());
+                this.elements.resetBtn.addEventListener('click', () => this.reset());
+            }
+
+            checkGeolocationSupport() {
+                if (!navigator.geolocation) {
+                    this.updateStatus('❌', 'Geolocation not supported', 'error');
+                    this.elements.startBtn.disabled = true;
+                } else {
+                    this.updateStatus('✅', 'Ready to start tracking', 'ready');
+                }
+            }
+
+            selectUnit(unit) {
+                // Update active button
+                document.querySelectorAll('.unit-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelector(`[data-unit="${unit}"]`).classList.add('active');
+                
+                this.currentUnit = unit;
+                const config = this.unitConfigs[unit];
+                
+                // Update speed unit display
+                this.elements.speedUnit.textContent = config.name;
+                
+                // Update distance label
+                this.elements.distanceLabel.textContent = `Distance (${config.distanceUnit})`;
+                
+                // Refresh all speed displays
+                this.updateSpeedDisplays();
+                this.updateDistanceDisplay();
+            }
+
+            async startTracking() {
+                if (this.isTracking) return;
+
+                this.updateStatus('🔍', 'Getting location...', 'searching');
+                
+                const options = {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                };
+
+                this.watchId = navigator.geolocation.watchPosition(
+                    (position) => this.handlePositionUpdate(position),
+                    (error) => this.handleError(error),
+                    options
+                );
+
+                this.isTracking = true;
+                this.startTime = Date.now();
+                this.elements.startBtn.disabled = true;
+                this.elements.stopBtn.disabled = false;
+                document.body.classList.add('tracking');
+            }
+
+            stopTracking() {
+                if (!this.isTracking) return;
+
+                if (this.watchId !== null) {
+                    navigator.geolocation.clearWatch(this.watchId);
+                    this.watchId = null;
+                }
+
+                this.isTracking = false;
+                this.elements.startBtn.disabled = false;
+                this.elements.stopBtn.disabled = true;
+                document.body.classList.remove('tracking');
+                this.updateStatus('⏹️', 'Tracking stopped', 'stopped');
+            }
+
+            reset() {
+                this.stopTracking();
+                
+                this.lastPosition = null;
+                this.lastTime = null;
+                this.speeds = [];
+                this.totalDistance = 0;
+                this.startTime = null;
+
+                this.elements.currentSpeed.textContent = '0';
+                this.elements.maxSpeed.textContent = '0';
+                this.elements.avgSpeed.textContent = '0';
+                this.elements.distance.textContent = '0.00';
+                this.elements.duration.textContent = '00:00';
+                this.elements.accuracy.textContent = '-';
+                this.elements.altitude.textContent = '-';
+                this.elements.coordinates.textContent = '-';
+
+                this.updateStatus('✅', 'Ready to start tracking', 'ready');
+            }
+
+            async handlePositionUpdate(position) {
+                const { latitude, longitude, accuracy, altitude } = position.coords;
+                const timestamp = position.timestamp;
+
+                this.updateLocationInfo(position);
+                await this.checkLocationContext(latitude, longitude);
+
+                if (this.lastPosition && this.lastTime) {
+                    const speed = this.calculateSpeed(
+                        this.lastPosition.latitude,
+                        this.lastPosition.longitude,
+                        latitude,
+                        longitude,
+                        timestamp - this.lastTime
+                    );
+
+                    this.speeds.push(speed);
+                    this.updateSpeedDisplays(speed);
+                    this.updateDistance(this.lastPosition, { latitude, longitude });
+                }
+
+                this.lastPosition = { latitude, longitude };
+                this.lastTime = timestamp;
+
+                this.updateStatus('🎯', 'Tracking active', 'tracking');
+                this.updateDuration();
+            }
+
+            async checkLocationContext(lat, lng) {
+                try {
+                    // Simple water detection based on OpenStreetMap Nominatim
+                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`);
+                    const data = await response.json();
+                    
+                    const isNearWater = data.display_name && (
+                        data.display_name.toLowerCase().includes('sea') ||
+                        data.display_name.toLowerCase().includes('ocean') ||
+                        data.display_name.toLowerCase().includes('bay') ||
+                        data.display_name.toLowerCase().includes('harbor') ||
+                        data.display_name.toLowerCase().includes('port') ||
+                        data.display_name.toLowerCase().includes('marina') ||
+                        data.display_name.toLowerCase().includes('coast') ||
+                        data.display_name.toLowerCase().includes('inlet') ||
+                        data.display_name.toLowerCase().includes('strait')
+                    );
+                    
+                    if (isNearWater) {
+                        this.elements.locationContext.className = 'location-context show sea';
+                        this.elements.locationText.textContent = '🌊 Marine/Coastal area detected';
+                        
+                        if (!this.nauticalSuggestionShown && this.currentUnit !== 'knots') {
+                            this.elements.nauticalSuggestion.classList.add('show');
+                            this.nauticalSuggestionShown = true;
+                        }
+                    } else {
+                        this.elements.locationContext.className = 'location-context show';
+                        this.elements.locationText.textContent = '🏞️ Land area detected';
+                    }
+                    
+                } catch (error) {
+                    console.log('Location context detection failed:', error);
+                    this.elements.locationContext.classList.remove('show');
+                }
+            }
+
+            calculateSpeed(lat1, lon1, lat2, lon2, timeDiff) {
+                // Calculate distance using Haversine formula
+                const R = 6371000; // Earth's radius in meters
+                const dLat = this.toRadians(lat2 - lat1);
+                const dLon = this.toRadians(lon2 - lon1);
+                
+                const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                        Math.cos(this.toRadians(lat1)) * Math.cos(this.toRadians(lat2)) *
+                        Math.sin(dLon/2) * Math.sin(dLon/2);
+                
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                const distance = R * c; // Distance in meters
+                
+                // Calculate speed in m/s, then convert to km/h
+                const timeInSeconds = timeDiff / 1000;
+                const speedMS = distance / timeInSeconds;
+                const speedKMH = speedMS * 3.6;
+                
+                return Math.max(0, speedKMH); // Ensure non-negative speed
+            }
+
+            updateSpeedDisplays(currentSpeed = null) {
+                const config = this.unitConfigs[this.currentUnit];
+                
+                if (currentSpeed !== null) {
+                    const displaySpeed = currentSpeed * config.factor;
+                    this.elements.currentSpeed.textContent = Math.round(displaySpeed);
+                    
+                    // Add warning class for high speeds (adjusted per unit)
+                    const speedThresholds = { kmh: 120, mph: 75, ms: 33, knots: 65, fps: 100 };
+                    if (displaySpeed > speedThresholds[this.currentUnit]) {
+                        this.elements.currentSpeed.classList.add('speed-warning');
+                    } else {
+                        this.elements.currentSpeed.classList.remove('speed-warning');
+                    }
+                }
+
+                if (this.speeds.length > 0) {
+                    const maxSpeed = Math.max(...this.speeds);
+                    const avgSpeed = this.speeds.reduce((a, b) => a + b, 0) / this.speeds.length;
+                    
+                    const displayMaxSpeed = maxSpeed * config.factor;
+                    const displayAvgSpeed = avgSpeed * config.factor;
+                    
+                    this.elements.maxSpeed.textContent = Math.round(displayMaxSpeed);
+                    this.elements.avgSpeed.textContent = Math.round(displayAvgSpeed);
+                }
+            }
+
+            updateDistance(lastPos, currentPos) {
+                const distance = this.calculateDistance(
+                    lastPos.latitude, lastPos.longitude,
+                    currentPos.latitude, currentPos.longitude
+                );
+                
+                this.totalDistance += distance;
+                this.updateDistanceDisplay();
+            }
+
+            updateDistanceDisplay() {
+                const config = this.unitConfigs[this.currentUnit];
+                const displayDistance = this.totalDistance * config.distanceFactor;
+                this.elements.distance.textContent = displayDistance.toFixed(2);
+            }
+
+            calculateDistance(lat1, lon1, lat2, lon2) {
+                const R = 6371000; // Earth's radius in meters
+                const dLat = this.toRadians(lat2 - lat1);
+                const dLon = this.toRadians(lon2 - lon1);
+                
+                const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                        Math.cos(this.toRadians(lat1)) * Math.cos(this.toRadians(lat2)) *
+                        Math.sin(dLon/2) * Math.sin(dLon/2);
+                
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                return R * c; // Distance in meters
+            }
+
+            updateLocationInfo(position) {
+                const { latitude, longitude, accuracy, altitude } = position.coords;
+                
+                this.elements.accuracy.textContent = `${Math.round(accuracy)}m`;
+                this.elements.accuracy.className = this.getAccuracyClass(accuracy);
+                
+                this.elements.altitude.textContent = altitude !== null ? `${Math.round(altitude)}m` : 'N/A';
+                this.elements.coordinates.textContent = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+            }
+
+            getAccuracyClass(accuracy) {
+                if (accuracy <= 10) return 'accuracy-good';
+                if (accuracy <= 50) return 'accuracy-medium';
+                return 'accuracy-poor';
+            }
+
+            updateDuration() {
+                if (!this.startTime) return;
+                
+                const elapsed = Date.now() - this.startTime;
+                const minutes = Math.floor(elapsed / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                
+                this.elements.duration.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            updateStatus(icon, text, type) {
+                const statusElement = this.elements.status;
+                const iconElement = statusElement.querySelector('.status-icon');
+                const textElement = statusElement.querySelector('.status-text');
+                
+                iconElement.textContent = icon;
+                textElement.textContent = text;
+                
+                // Remove previous status classes
+                statusElement.classList.remove('status-error', 'status-warning', 'status-success');
+                
+                // Add new status class
+                if (type === 'error') statusElement.classList.add('status-error');
+                if (type === 'warning') statusElement.classList.add('status-warning');
+                if (type === 'tracking') statusElement.classList.add('status-success');
+            }
+
+            handleError(error) {
+                console.error('Geolocation error:', error);
+                
+                let message = '';
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        message = 'Location access denied. Please enable location permissions.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        message = 'Location information unavailable.';
+                        break;
+                    case error.TIMEOUT:
+                        message = 'Location request timed out.';
+                        break;
+                    default:
+                        message = 'An unknown error occurred.';
+                        break;
+                }
+                
+                this.updateStatus('❌', message, 'error');
+                this.stopTracking();
+            }
+
+            toRadians(degrees) {
+                return degrees * (Math.PI / 180);
+            }
+        }
+
+        // Global functions for button handlers
+        let speedMeter;
+
+        function selectUnit(unit) {
+            speedMeter.selectUnit(unit);
+        }
+
+        function switchToKnots() {
+            selectUnit('knots');
+            dismissNauticalSuggestion();
+        }
+
+        function dismissNauticalSuggestion() {
+            document.getElementById('nauticalSuggestion').classList.remove('show');
+        }
+
+        // Initialize the speed meter when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            speedMeter = new EnhancedSpeedMeter();
+        });
+
+        // Register service worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => console.log('SW registered: ', registration))
+                    .catch(registrationError => console.log('SW registration failed: ', registrationError));
+            });
+        }
+    </script>
+</body>
+</html> 
