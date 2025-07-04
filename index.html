@@ -145,12 +145,40 @@
             </section>
         </main>
 
+        <!-- AdSense placeholder - will be added after approval -->
+        <div id="adsense-container" style="text-align: center; margin: 20px 0;">
+            <!-- Google AdSense ads will appear here -->
+        </div>
+
         <footer class="app-footer">
-            <p>Free GPS speed measurement tool. Works on any smartphone browser.</p>
-            <p><small>Requires location permissions and GPS-enabled device.</small></p>
+            <div class="footer-links">
+                <a href="privacy-policy.html" target="_blank">🛡️ Privacy Policy</a>
+                <span>•</span>
+                <a href="terms-of-service.html" target="_blank">📋 Terms of Service</a>
+                <span>•</span>
+                <a href="https://github.com/fzvincent/speed-meter" target="_blank">💻 GitHub</a>
+            </div>
+            <p class="footer-text">
+                📱 Mobile Speed Meter © 2024 | 
+                <span>Made with ❤️ for the mobile web community</span>
+            </p>
         </footer>
     </div>
 
     <script src="script.js"></script>
+    <script>
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/speed-meter/sw.js')
+                    .then((registration) => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch((registrationError) => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
 </body>
 </html> 

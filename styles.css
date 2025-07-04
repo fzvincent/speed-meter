@@ -283,33 +283,63 @@ header h1 {
 .accuracy-medium { color: #ff9800; }
 .accuracy-poor { color: #f44336; }
 
+/* Footer styling */
 .app-footer {
+    margin-top: 2rem;
+    padding: 1.5rem 1rem;
     text-align: center;
-    padding: 20px;
-    margin-top: 30px;
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 15px;
     backdrop-filter: blur(10px);
+    border-radius: 15px;
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.app-footer p {
-    margin: 5px 0;
-    color: rgba(255, 255, 255, 0.9);
+.footer-links {
+    margin-bottom: 1rem;
 }
 
-.app-footer small {
-    color: rgba(255, 255, 255, 0.7);
+.footer-links a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.footer-links a:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.footer-links span {
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0 0.5rem;
+}
+
+.footer-text {
     font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+    line-height: 1.4;
 }
 
-/* Improve semantic sections */
-section {
-    margin-bottom: 25px;
+#adsense-container {
+    margin: 2rem 0;
+    padding: 1rem;
+    min-height: 100px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    border: 1px dashed rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
 }
 
-.speed-section .speed-display {
-    margin-bottom: 20px;
+#adsense-container::before {
+    content: "📢 Advertisements will appear here after AdSense approval";
 }
 
 /* Accessibility improvements */
