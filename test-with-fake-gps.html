@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed Meter - Test with Fake GPS</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .test-controls {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .test-controls h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .scenario-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin: 5px;
+            transition: background 0.3s ease;
+        }
+        .scenario-btn:hover {
+            background: #5a6268;
+        }
+        .scenario-btn.active {
+            background: #007bff;
+        }
+        .test-info {
+            background: #e7f3ff;
+            border: 1px solid #b3d7ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📱 Speed Meter</h1>
+            <p class="subtitle">Test with Simulated GPS Data</p>
+        </header>
+
+        <div class="test-controls">
+            <h3>🧪 Test Scenarios</h3>
+            <button class="scenario-btn" onclick="startScenario('walking')">🚶 Walking (5 km/h)</button>
+            <button class="scenario-btn" onclick="startScenario('cycling')">🚴 Cycling (20 km/h)</button>
+            <button class="scenario-btn" onclick="startScenario('driving')">🚗 City Driving (50 km/h)</button>
+            <button class="scenario-btn" onclick="startScenario('highway')">🛣️ Highway (100 km/h)</button>
+            <button class="scenario-btn" onclick="startScenario('accelerating')">🏎️ Accelerating (0-80 km/h)</button>
+            
+            <div class="test-info">
+                <strong>Test Mode Active:</strong> This version uses simulated GPS data to demonstrate speed calculations. 
+                Click a scenario above, then press "Start Tracking" to see the app in action!
+            </div>
+        </div>
+
+        <main>
+            <div class="speed-display">
+                <div class="current-speed">
+                    <span class="speed-value" id="currentSpeed">0</span>
+                    <span class="speed-unit" id="speedUnit">km/h</span>
+                </div>
+                <div class="speed-label">Current Speed</div>
+            </div>
+
+            <div class="unit-toggle">
+                <button id="unitToggle" class="btn btn-unit">Switch to mph</button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="maxSpeed">0</div>
+                    <div class="stat-label">Max Speed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avgSpeed">0</div>
+                    <div class="stat-label">Avg Speed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="distance">0.00</div>
+                    <div class="stat-label">Distance (km)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="duration">00:00</div>
+                    <div class="stat-label">Duration</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="startBtn" class="btn btn-start">Start Tracking</button>
+                <button id="stopBtn" class="btn btn-stop" disabled>Stop Tracking</button>
+                <button id="resetBtn" class="btn btn-reset">Reset</button>
+            </div>
+
+            <div class="location-info">
+                <div class="info-item">
+                    <strong>Accuracy:</strong> <span id="accuracy">-</span>
+                </div>
+                <div class="info-item">
+                    <strong>Altitude:</strong> <span id="altitude">-</span>
+                </div>
+                <div class="info-item">
+                    <strong>Coordinates:</strong> <span id="coordinates">-</span>
+                </div>
+            </div>
+
+            <div class="status" id="status">
+                <div class="status-icon">⏳</div>
+                <div class="status-text">Select a test scenario and start tracking</div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        class FakeSpeedMeter {
+            constructor() {
+                this.isTracking = false;
+                this.lastPosition = null;
+                this.lastTime = null;
+                this.speeds = [];
+                this.totalDistance = 0;
+                this.startTime = null;
+                this.isMetric = true;
+                this.currentScenario = null;
+                this.simulationInterval = null;
+                this.simulationStep = 0;
+                
+                // Starting position (roughly Times Square, NYC)
+                this.basePosition = {
+                    latitude: 40.7580,
+                    longitude: -73.9855
+                };
+                
+                this.initializeElements();
+                this.attachEventListeners();
+                this.updateStatus('✅', 'Select a test scenario and start tracking', 'ready');
+            }
+
+            initializeElements() {
+                this.elements = {
+                    currentSpeed: document.getElementById('currentSpeed'),
+                    speedUnit: document.getElementById('speedUnit'),
+                    maxSpeed: document.getElementById('maxSpeed'),
+                    avgSpeed: document.getElementById('avgSpeed'),
+                    distance: document.getElementById('distance'),
+                    duration: document.getElementById('duration'),
+                    accuracy: document.getElementById('accuracy'),
+                    altitude: document.getElementById('altitude'),
+                    coordinates: document.getElementById('coordinates'),
+                    status: document.getElementById('status'),
+                    startBtn: document.getElementById('startBtn'),
+                    stopBtn: document.getElementById('stopBtn'),
+                    resetBtn: document.getElementById('resetBtn'),
+                    unitToggle: document.getElementById('unitToggle')
+                };
+            }
+
+            attachEventListeners() {
+                this.elements.startBtn.addEventListener('click', () => this.startTracking());
+                this.elements.stopBtn.addEventListener('click', () => this.stopTracking());
+                this.elements.resetBtn.addEventListener('click', () => this.reset());
+                this.elements.unitToggle.addEventListener('click', () => this.toggleUnits());
+            }
+
+            startTracking() {
+                if (this.isTracking) return;
+                if (!this.currentScenario) {
+                    alert('Please select a test scenario first!');
+                    return;
+                }
+
+                this.isTracking = true;
+                this.startTime = Date.now();
+                this.simulationStep = 0;
+                this.elements.startBtn.disabled = true;
+                this.elements.stopBtn.disabled = false;
+                document.body.classList.add('tracking');
+                
+                this.updateStatus('🎯', `Simulating ${this.currentScenario.name}`, 'tracking');
+                
+                // Start simulation
+                this.simulationInterval = setInterval(() => {
+                    this.simulateGPSUpdate();
+                }, 1000); // Update every second
+            }
+
+            stopTracking() {
+                if (!this.isTracking) return;
+
+                if (this.simulationInterval) {
+                    clearInterval(this.simulationInterval);
+                    this.simulationInterval = null;
+                }
+
+                this.isTracking = false;
+                this.elements.startBtn.disabled = false;
+                this.elements.stopBtn.disabled = true;
+                document.body.classList.remove('tracking');
+                this.updateStatus('⏹️', 'Simulation stopped', 'stopped');
+            }
+
+            reset() {
+                this.stopTracking();
+                
+                this.lastPosition = null;
+                this.lastTime = null;
+                this.speeds = [];
+                this.totalDistance = 0;
+                this.startTime = null;
+                this.simulationStep = 0;
+
+                this.elements.currentSpeed.textContent = '0';
+                this.elements.maxSpeed.textContent = '0';
+                this.elements.avgSpeed.textContent = '0';
+                this.elements.distance.textContent = '0.00';
+                this.elements.duration.textContent = '00:00';
+                this.elements.accuracy.textContent = '-';
+                this.elements.altitude.textContent = '-';
+                this.elements.coordinates.textContent = '-';
+
+                this.updateStatus('✅', 'Select a test scenario and start tracking', 'ready');
+            }
+
+            simulateGPSUpdate() {
+                const scenario = this.currentScenario;
+                const speed = scenario.getSpeed(this.simulationStep);
+                const timestamp = Date.now();
+                
+                // Calculate new position based on speed
+                const position = this.calculateNewPosition(speed);
+                
+                this.updateLocationInfo({
+                    coords: {
+                        latitude: position.latitude,
+                        longitude: position.longitude,
+                        accuracy: 5 + Math.random() * 10, // 5-15m accuracy
+                        altitude: 50 + Math.random() * 100 // Random altitude
+                    },
+                    timestamp: timestamp
+                });
+
+                if (this.lastPosition && this.lastTime) {
+                    const calculatedSpeed = this.calculateSpeed(
+                        this.lastPosition.latitude,
+                        this.lastPosition.longitude,
+                        position.latitude,
+                        position.longitude,
+                        timestamp - this.lastTime
+                    );
+
+                    this.speeds.push(calculatedSpeed);
+                    this.updateSpeedDisplays(calculatedSpeed);
+                    this.updateDistance(this.lastPosition, position);
+                }
+
+                this.lastPosition = position;
+                this.lastTime = timestamp;
+                this.simulationStep++;
+                this.updateDuration();
+            }
+
+            calculateNewPosition(speedKmh) {
+                // Convert speed to meters per second
+                const speedMs = speedKmh / 3.6;
+                
+                // Simple movement simulation (moving north)
+                const earthRadius = 6371000; // meters
+                const deltaLat = speedMs / earthRadius * (180 / Math.PI);
+                
+                const newLat = this.basePosition.latitude + (deltaLat * this.simulationStep);
+                const newLng = this.basePosition.longitude + (Math.sin(this.simulationStep * 0.1) * 0.001); // slight curve
+                
+                return {
+                    latitude: newLat,
+                    longitude: newLng
+                };
+            }
+
+            // Rest of the methods are same as original SpeedMeter class
+            calculateSpeed(lat1, lon1, lat2, lon2, timeDiff) {
+                const R = 6371000;
+                const dLat = this.toRadians(lat2 - lat1);
+                const dLon = this.toRadians(lon2 - lon1);
+                
+                const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                        Math.cos(this.toRadians(lat1)) * Math.cos(this.toRadians(lat2)) *
+                        Math.sin(dLon/2) * Math.sin(dLon/2);
+                
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                const distance = R * c;
+                
+                const timeInSeconds = timeDiff / 1000;
+                const speedMS = distance / timeInSeconds;
+                const speedKMH = speedMS * 3.6;
+                
+                return Math.max(0, speedKMH);
+            }
+
+            updateSpeedDisplays(currentSpeed = null) {
+                if (currentSpeed !== null) {
+                    const displaySpeed = this.isMetric ? currentSpeed : currentSpeed * 0.621371;
+                    this.elements.currentSpeed.textContent = Math.round(displaySpeed);
+                    
+                    if (displaySpeed > (this.isMetric ? 120 : 75)) {
+                        this.elements.currentSpeed.classList.add('speed-warning');
+                    } else {
+                        this.elements.currentSpeed.classList.remove('speed-warning');
+                    }
+                }
+
+                if (this.speeds.length > 0) {
+                    const maxSpeed = Math.max(...this.speeds);
+                    const avgSpeed = this.speeds.reduce((a, b) => a + b, 0) / this.speeds.length;
+                    
+                    const displayMaxSpeed = this.isMetric ? maxSpeed : maxSpeed * 0.621371;
+                    const displayAvgSpeed = this.isMetric ? avgSpeed : avgSpeed * 0.621371;
+                    
+                    this.elements.maxSpeed.textContent = Math.round(displayMaxSpeed);
+                    this.elements.avgSpeed.textContent = Math.round(displayAvgSpeed);
+                }
+            }
+
+            updateDistance(lastPos, currentPos) {
+                const distance = this.calculateDistance(
+                    lastPos.latitude, lastPos.longitude,
+                    currentPos.latitude, currentPos.longitude
+                );
+                
+                this.totalDistance += distance;
+                const displayDistance = this.isMetric ? this.totalDistance / 1000 : this.totalDistance / 1609.34;
+                this.elements.distance.textContent = displayDistance.toFixed(2);
+            }
+
+            calculateDistance(lat1, lon1, lat2, lon2) {
+                const R = 6371000;
+                const dLat = this.toRadians(lat2 - lat1);
+                const dLon = this.toRadians(lon2 - lon1);
+                
+                const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                        Math.cos(this.toRadians(lat1)) * Math.cos(this.toRadians(lat2)) *
+                        Math.sin(dLon/2) * Math.sin(dLon/2);
+                
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                return R * c;
+            }
+
+            updateLocationInfo(position) {
+                const { latitude, longitude, accuracy, altitude } = position.coords;
+                
+                this.elements.accuracy.textContent = `${Math.round(accuracy)}m`;
+                this.elements.accuracy.className = this.getAccuracyClass(accuracy);
+                
+                this.elements.altitude.textContent = `${Math.round(altitude)}m`;
+                this.elements.coordinates.textContent = 
+                    `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+            }
+
+            getAccuracyClass(accuracy) {
+                if (accuracy <= 10) return 'accuracy-good';
+                if (accuracy <= 50) return 'accuracy-medium';
+                return 'accuracy-poor';
+            }
+
+            updateDuration() {
+                if (!this.startTime) return;
+                
+                const elapsed = Date.now() - this.startTime;
+                const minutes = Math.floor(elapsed / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                
+                this.elements.duration.textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            updateStatus(icon, text, type) {
+                const statusElement = this.elements.status;
+                const iconElement = statusElement.querySelector('.status-icon');
+                const textElement = statusElement.querySelector('.status-text');
+                
+                iconElement.textContent = icon;
+                textElement.textContent = text;
+                
+                statusElement.classList.remove('status-error', 'status-warning', 'status-success');
+                
+                if (type === 'error') statusElement.classList.add('status-error');
+                if (type === 'warning') statusElement.classList.add('status-warning');
+                if (type === 'tracking') statusElement.classList.add('status-success');
+            }
+
+            toggleUnits() {
+                this.isMetric = !this.isMetric;
+                const unit = this.isMetric ? 'km/h' : 'mph';
+                const toggleText = this.isMetric ? 'Switch to mph' : 'Switch to km/h';
+                
+                this.elements.speedUnit.textContent = unit;
+                this.elements.unitToggle.textContent = toggleText;
+                
+                this.updateSpeedDisplays();
+            }
+
+            toRadians(degrees) {
+                return degrees * (Math.PI / 180);
+            }
+        }
+
+        // Test scenarios
+        const scenarios = {
+            walking: {
+                name: 'Walking',
+                getSpeed: (step) => 5 + Math.sin(step * 0.2) * 1 // 4-6 km/h with variation
+            },
+            cycling: {
+                name: 'Cycling',
+                getSpeed: (step) => 20 + Math.sin(step * 0.3) * 5 // 15-25 km/h
+            },
+            driving: {
+                name: 'City Driving',
+                getSpeed: (step) => {
+                    // Simulate city driving with stops
+                    const cycle = step % 20;
+                    if (cycle < 5) return 0; // Stopped at traffic light
+                    if (cycle < 10) return cycle * 10; // Accelerating
+                    return 50 + Math.sin(step * 0.1) * 10; // 40-60 km/h
+                }
+            },
+            highway: {
+                name: 'Highway Driving',
+                getSpeed: (step) => 100 + Math.sin(step * 0.1) * 20 // 80-120 km/h
+            },
+            accelerating: {
+                name: 'Accelerating Vehicle',
+                getSpeed: (step) => Math.min(step * 2, 80) // 0 to 80 km/h gradually
+            }
+        };
+
+        let speedMeter;
+
+        function startScenario(scenarioName) {
+            // Remove active class from all buttons
+            document.querySelectorAll('.scenario-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+            
+            if (speedMeter && speedMeter.isTracking) {
+                speedMeter.stopTracking();
+            }
+            
+            speedMeter.currentScenario = scenarios[scenarioName];
+            speedMeter.reset();
+            speedMeter.updateStatus('✅', `${scenarios[scenarioName].name} scenario selected. Ready to start!`, 'ready');
+        }
+
+        // Initialize the speed meter when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            speedMeter = new FakeSpeedMeter();
+        });
+    </script>
+</body>
+</html> 

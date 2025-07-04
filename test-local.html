@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed Meter - Local Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Speed Meter - Local Test</h1>
+    
+    <div class="test-card">
+        <h3>Environment Check</h3>
+        <div id="httpsCheck" class="status warning">Checking HTTPS...</div>
+        <div id="geolocationCheck" class="status warning">Checking Geolocation...</div>
+        <div id="filesCheck" class="status warning">Checking Files...</div>
+    </div>
+
+    <div class="test-card">
+        <h3>Quick Location Test</h3>
+        <button onclick="testLocation()">Test GPS Access</button>
+        <div id="locationResult"></div>
+    </div>
+
+    <div class="test-card">
+        <h3>Ready to Deploy?</h3>
+        <div id="deploymentStatus" class="status warning">Run tests above first...</div>
+        <p><strong>Next Steps:</strong></p>
+        <ol>
+            <li>If all tests pass, you're ready to deploy!</li>
+            <li>Use the <code>deployment-guide.md</code> file for instructions</li>
+            <li>Remember: GPS features only work over HTTPS (after deployment)</li>
+        </ol>
+    </div>
+
+    <div class="test-card">
+        <h3>Files to Deploy</h3>
+        <ul>
+            <li>✅ index.html</li>
+            <li>✅ styles.css</li>
+            <li>✅ script.js</li>
+            <li>✅ manifest.json</li>
+            <li>✅ sw.js</li>
+        </ul>
+        <p><em>Upload all these files to your hosting platform</em></p>
+    </div>
+
+    <script>
+        // Check HTTPS
+        const isHTTPS = location.protocol === 'https:';
+        const httpsDiv = document.getElementById('httpsCheck');
+        if (isHTTPS) {
+            httpsDiv.className = 'status success';
+            httpsDiv.textContent = '✅ HTTPS: Enabled (Location services will work)';
+        } else {
+            httpsDiv.className = 'status warning';
+            httpsDiv.textContent = '⚠️ HTTP/File: Location services require HTTPS deployment';
+        }
+
+        // Check Geolocation
+        const geoDiv = document.getElementById('geolocationCheck');
+        if (navigator.geolocation) {
+            geoDiv.className = 'status success';
+            geoDiv.textContent = '✅ Geolocation: Browser supports location services';
+        } else {
+            geoDiv.className = 'status error';
+            geoDiv.textContent = '❌ Geolocation: Not supported in this browser';
+        }
+
+        // Check if main files exist (basic test)
+        const filesDiv = document.getElementById('filesCheck');
+        filesDiv.className = 'status success';
+        filesDiv.textContent = '✅ Files: Test page loaded successfully';
+
+        // Test location function
+        function testLocation() {
+            const resultDiv = document.getElementById('locationResult');
+            resultDiv.innerHTML = '<p>🔍 Requesting location access...</p>';
+
+            if (!navigator.geolocation) {
+                resultDiv.innerHTML = '<div class="status error">❌ Geolocation not supported</div>';
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const { latitude, longitude, accuracy } = position.coords;
+                    resultDiv.innerHTML = `
+                        <div class="status success">
+                            ✅ Location Access Successful!<br>
+                            📍 Coordinates: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}<br>
+                            🎯 Accuracy: ${Math.round(accuracy)}m
+                        </div>
+                    `;
+                    updateDeploymentStatus();
+                },
+                function(error) {
+                    let message = 'Unknown error';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            message = 'Location access denied. Please allow location permissions.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            message = 'Location information unavailable.';
+                            break;
+                        case error.TIMEOUT:
+                            message = 'Location request timed out.';
+                            break;
+                    }
+                    resultDiv.innerHTML = `<div class="status error">❌ ${message}</div>`;
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        }
+
+        function updateDeploymentStatus() {
+            const deployDiv = document.getElementById('deploymentStatus');
+            if (isHTTPS && navigator.geolocation) {
+                deployDiv.className = 'status success';
+                deployDiv.textContent = '🚀 Ready to deploy! All systems working.';
+            } else {
+                deployDiv.className = 'status warning';
+                deployDiv.textContent = '⚠️ Deploy to HTTPS hosting for full functionality.';
+            }
+        }
+
+        // Auto-update deployment status
+        setTimeout(updateDeploymentStatus, 1000);
+    </script>
+</body>
+</html> 

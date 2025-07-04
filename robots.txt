@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+
+# Important pages
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://your-domain.com/sitemap.xml
+
+# Disallow service worker and manifest files from indexing
+Disallow: /sw.js
+Disallow: /manifest.json
+
+# Allow all main content
+Allow: /index.html
+Allow: /test-with-fake-gps.html
+Allow: /test-local.html
+Allow: /styles.css
+Allow: /script.js 

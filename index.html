@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Primary Meta Tags -->
+    <title>Mobile Speed Meter - GPS Speed Tracker | Real-time Speed Measurement</title>
+    <meta name="title" content="Mobile Speed Meter - GPS Speed Tracker | Real-time Speed Measurement">
+    <meta name="description" content="Free mobile speed meter app. Track your speed in real-time using GPS. Perfect for walking, cycling, driving. Works on any smartphone browser. No download required.">
+    <meta name="keywords" content="speed meter, GPS speed tracker, mobile speedometer, real-time speed, speed measurement app, GPS tracker, vehicle speed, cycling speed, walking speed">
+    <meta name="author" content="Speed Meter App">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://your-domain.com/">
+    <meta property="og:title" content="Mobile Speed Meter - GPS Speed Tracker">
+    <meta property="og:description" content="Free mobile speed meter app. Track your speed in real-time using GPS. Perfect for walking, cycling, driving.">
+    <meta property="og:image" content="https://your-domain.com/speed-meter-preview.png">
+    <meta property="og:site_name" content="Mobile Speed Meter">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://your-domain.com/">
+    <meta property="twitter:title" content="Mobile Speed Meter - GPS Speed Tracker">
+    <meta property="twitter:description" content="Free mobile speed meter app. Track your speed in real-time using GPS. Perfect for walking, cycling, driving.">
+    <meta property="twitter:image" content="https://your-domain.com/speed-meter-preview.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    
+    <!-- PWA -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2196F3">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Speed Meter">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Mobile Speed Meter",
+        "description": "Free mobile speed meter app for real-time GPS speed tracking",
+        "url": "https://your-domain.com",
+        "applicationCategory": "UtilityApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires HTML5 and GPS support",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "creator": {
+            "@type": "Organization",
+            "name": "Speed Meter App"
+        },
+        "featureList": [
+            "Real-time GPS speed tracking",
+            "Distance measurement",
+            "Speed unit conversion (km/h to mph)",
+            "Maximum and average speed calculation",
+            "Mobile responsive design",
+            "Works offline"
+        ]
+    }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📱 Speed Meter</h1>
+            <p class="subtitle">Real-time mobile speed tracking</p>
+        </header>
+
+        <main>
+            <section class="speed-section" aria-label="Current speed display">
+                <div class="speed-display">
+                    <div class="current-speed">
+                        <span class="speed-value" id="currentSpeed" aria-label="Current speed value">0</span>
+                        <span class="speed-unit" id="speedUnit">km/h</span>
+                    </div>
+                    <div class="speed-label">Current Speed</div>
+                </div>
+
+                <div class="unit-toggle">
+                    <button id="unitToggle" class="btn btn-unit" aria-label="Toggle between kilometers and miles per hour">Switch to mph</button>
+                </div>
+            </section>
+
+            <section class="stats-section" aria-label="Speed statistics">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="maxSpeed" aria-label="Maximum speed achieved">0</div>
+                        <div class="stat-label">Max Speed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgSpeed" aria-label="Average speed">0</div>
+                        <div class="stat-label">Avg Speed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="distance" aria-label="Total distance traveled">0.00</div>
+                        <div class="stat-label">Distance (km)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="duration" aria-label="Trip duration">00:00</div>
+                        <div class="stat-label">Duration</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="controls-section" aria-label="Speed tracking controls">
+                <div class="controls">
+                    <button id="startBtn" class="btn btn-start" aria-label="Start speed tracking">Start Tracking</button>
+                    <button id="stopBtn" class="btn btn-stop" disabled aria-label="Stop speed tracking">Stop Tracking</button>
+                    <button id="resetBtn" class="btn btn-reset" aria-label="Reset all measurements">Reset</button>
+                </div>
+            </section>
+
+            <section class="location-section" aria-label="GPS location information">
+                <div class="location-info">
+                    <div class="info-item">
+                        <strong>Accuracy:</strong> <span id="accuracy" aria-label="GPS accuracy">-</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Altitude:</strong> <span id="altitude" aria-label="Current altitude">-</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Coordinates:</strong> <span id="coordinates" aria-label="GPS coordinates">-</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="status-section" aria-label="Application status">
+                <div class="status" id="status">
+                    <div class="status-icon" aria-hidden="true">⏳</div>
+                    <div class="status-text">Ready to start tracking</div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <p>Free GPS speed measurement tool. Works on any smartphone browser.</p>
+            <p><small>Requires location permissions and GPS-enabled device.</small></p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
