@@ -44,47 +44,57 @@
     <style>
         /* Additional styles for enhanced features */
         .unit-selector {
-            background: rgba(255,255,255,0.95);
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
             border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.2);
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .unit-selector h3 {
+            color: rgba(255,255,255,0.9);
+            margin: 0 0 15px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
         }
         
         .unit-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            display: flex;
+            flex-wrap: wrap;
             gap: 10px;
-            margin-top: 15px;
         }
         
         .unit-btn {
-            background: #f8f9fa;
-            border: 2px solid #dee2e6;
-            color: #495057;
-            padding: 10px 15px;
-            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: rgba(255,255,255,0.8);
+            padding: 8px 12px;
+            border-radius: 20px;
             font-size: 0.9rem;
             cursor: pointer;
             transition: all 0.3s ease;
             text-align: center;
             font-weight: 500;
+            backdrop-filter: blur(5px);
         }
         
         .unit-btn:hover {
-            background: #e9ecef;
-            border-color: #adb5bd;
-        }
-        
-        .unit-btn.active {
-            background: #007bff;
-            border-color: #007bff;
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
             color: white;
         }
         
+        .unit-btn.active {
+            background: rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.6);
+            color: white;
+            box-shadow: 0 0 15px rgba(255,255,255,0.3);
+        }
+        
         .unit-btn.nautical {
-            background: #17a2b8;
-            border-color: #17a2b8;
+            background: rgba(23, 162, 184, 0.3);
+            border-color: rgba(23, 162, 184, 0.6);
             color: white;
         }
         
@@ -195,19 +205,19 @@
                 <h3>📏 Speed Units</h3>
                 <div class="unit-options">
                     <button class="unit-btn active" data-unit="kmh" onclick="selectUnit('kmh')">
-                        km/h<br><small>Kilometers per hour</small>
+                        km/h
                     </button>
                     <button class="unit-btn" data-unit="mph" onclick="selectUnit('mph')">
-                        mph<br><small>Miles per hour</small>
+                        mph
                     </button>
                     <button class="unit-btn" data-unit="ms" onclick="selectUnit('ms')">
-                        m/s<br><small>Meters per second</small>
+                        m/s
                     </button>
                     <button class="unit-btn" data-unit="knots" onclick="selectUnit('knots')">
-                        knots<br><small>Nautical miles per hour</small>
+                        knots
                     </button>
                     <button class="unit-btn" data-unit="fps" onclick="selectUnit('fps')">
-                        ft/s<br><small>Feet per second</small>
+                        ft/s
                     </button>
                 </div>
             </div>
