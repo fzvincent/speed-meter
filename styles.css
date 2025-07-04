@@ -338,8 +338,9 @@ header h1 {
     color: rgba(255, 255, 255, 0.6);
 }
 
+/* AdSense is now active - remove placeholder text */
 #adsense-container::before {
-    content: "📢 Advertisements will appear here after AdSense approval";
+    content: "";
 }
 
 /* Accessibility improvements */
